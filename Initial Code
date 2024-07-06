@@ -5,8 +5,10 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
 import java.util.Random;
+
+// The original project's code
+
 public class Minecraft extends Application {
 
     private static final int WIDTH = 800;
