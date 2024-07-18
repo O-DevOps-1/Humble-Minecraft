@@ -7,6 +7,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -85,8 +86,7 @@ public class Minecraft extends Application {
                     // Open crafting menu
                     openCraftingMenu();
                     break;
-            }
-        });
+            } });
 
         gameLoop = new Timeline(new KeyFrame(Duration.millis(16), e -> {
             // Update game logic here
@@ -111,9 +111,8 @@ public class Minecraft extends Application {
         for (int x = 0; x < world.length; x++) {
             for (int y = 0; y < world[x].length; y++) {
                 BlockType type = random.nextBoolean()? BlockType.STONE : BlockType.AIR;
-                world[x][y] = new Block(type);
-            }
-        }
+                world[x][y] = new Block(type) ;
+            }}
         // set the player's initial position to the center of the world
         playerX = world.length / 2;
         playerY = world[0].length / 2;
@@ -145,10 +144,7 @@ public class Minecraft extends Application {
                             gc.setFill(Color.WHITE);
                     }
                     // draw a block at the current position
-                    gc.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                }
-            }
-       }
+                    gc.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE); }}}
         // drawing the  player as a red block, as an example
         gc.setFill(Color.RED);
         gc.fillRect(playerX * BLOCK_SIZE, playerY * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
@@ -175,10 +171,9 @@ public class Minecraft extends Application {
         } else if (Math.random() < 0.005) {
             setWeather(WeatherType.SNOW);
         } else if (Math.random() < 0.002) {
-            setWeather(WeatherType.STORM);
-        }
+            setWeather(WeatherType.STORM);}
 
-        // Draw biomes
+        // draw biomas
         for (int x = 0; x < world.length; x++) {
             for (int y = 0; y < world[x].length; y++) {
                 Block block = world[x][y];
@@ -187,13 +182,9 @@ public class Minecraft extends Application {
                         world[x][y].setType(BlockType.GRASS);
                     } else if (block.getType() == BlockType.AIR && Math.random() < 0.01) {
                         world[x][y].setType(BlockType.WATER);
-                    }
-                }
-            }
-        }
-    }
+                    } }}}}
 
-    // move the player by the given amount
+    // move the player by the given amount of moves
     private void movePlayer(int dx, int dy) {
         int newX = playerX + dx / BLOCK_SIZE;
         int newY = playerY + dy / BLOCK_SIZE;
@@ -203,34 +194,30 @@ public class Minecraft extends Application {
             if (block!= null && block.getType() == BlockType.AIR) {
                 playerX = newX;
                 playerY = newY;
-            }
-        }
-    }
+            }}}
 
     private void breakBlock() {
         Block block = world[playerX][playerY];
         if (block!= null && !block.isBroken()) {
             block.breakBlock();
             new Thread(() -> {
-                try {
+            try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 block.setType(BlockType.AIR);
             }).start();
-        }
-    }
+        }}
 
     private void placeBlock() {
         if (playerX >= 0 && playerX < world.length && playerY >= 0 && playerY < world[0].length) {
             world[playerX][playerY] = new Block(BlockType.DIRT);
-        }
-    }
+        }}
 
     private void openCraftingMenu() {
-        // Open a crafting menu, allowing players to craft new items
-        // Implementation not provided here
+        // open a crafting menu, allowing players to craft new items
+        // implementation not provided so far!
     }
 
     private void updateGame() {
@@ -243,10 +230,7 @@ public class Minecraft extends Application {
                     if (playerX == x && playerY == y) {
                         //Colission
                         System.out.println("Player collided with stone block!");
-                    }
-                }
-            }
-        }
+                    }}}}
 
         // Update mob
         mob.update();
@@ -266,15 +250,11 @@ public class Minecraft extends Application {
                 Block block = world[x][y];
                 if (block!= null) {
                     block.update();
-                }
-            }
-        }
-    }
+                }}}}
 
     private void setWeather(WeatherType weather) {
-        // Set the weather to the specified type
-        // Implementation not provided here
-    }
+        // set the weather to the specified type
+        // Implementation not provided here, as the other one}
 
     public enum BlockType {
         AIR, STONE, DIRT, GRASS, WATER
@@ -316,9 +296,7 @@ public class Minecraft extends Application {
                     }
                     setType(BlockType.AIR);
                 }).start();
-            }
-        }
-    }
+            }}}
 
     public static class Mob {
         private int x, y;
@@ -328,8 +306,7 @@ public class Minecraft extends Application {
         public Mob(Block[][] world, int playerX, int playerY) {
             this.world = world;
             this.x = playerX;
-            this.y = playerY;
-        }
+            this.y = playerY;}
 
         public int getX() {
             return x;
@@ -340,7 +317,7 @@ public class Minecraft extends Application {
         }
 
         public void update() {
-            // Simple mob AI
+            // simple mob AI 
             if (x < playerX) {
                 x += speed;
             } else if (x > playerX) {
@@ -351,9 +328,8 @@ public class Minecraft extends Application {
                 y += speed;
             } else if (y > playerY) {
                 y -= speed;
-            }
-        }
-    }
+            }}
+    
 
     public enum WeatherType {
         RAIN, SNOW, STORM
@@ -367,4 +343,4 @@ public class Minecraft extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-}
+}}
