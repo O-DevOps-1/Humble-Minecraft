@@ -1,0 +1,220 @@
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.util.Random;
+
+public class Minecraft extends Application {
+
+    // constants for the game window size and block size
+    private static final int WIDTH = 800;
+    private static final int HEIGHT = 600;
+    private static final int BLOCK_SIZE = 20;
+
+    private GraphicsContext gc;
+
+    // 2D array to represent the game world
+    private Block[][] world;
+
+    private int playerX, playerY;
+    private int playerSpeed = 5;
+
+    private Timeline gameLoop;
+
+    @Override
+    public void start(Stage primaryStage) {
+        // Canvas to draw on
+        Canvas canvas = new Canvas(WIDTH, HEIGHT);
+        gc = canvas.getGraphicsContext2D();
+
+        // creating a stack pane to hold the canvas
+        StackPane root = new StackPane();
+        root.getChildren().add(canvas);
+
+        // create a scene and set it to the primary stage
+        Scene scene = new Scene(root, WIDTH, HEIGHT);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        initWorld();
+        drawWorld();
+
+        scene.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case W:
+                    // Move player up
+                    movePlayer(0, -playerSpeed);
+                    break;
+                case S:
+                    // Move player down
+                    movePlayer(0, playerSpeed);
+                    break;
+                case A:
+                    // Move player left
+                    movePlayer(-playerSpeed, 0);
+                    break;
+                case D:
+                    // Move player right
+                    movePlayer(playerSpeed, 0);
+                    break;
+                case SPACE:
+                    // Break block
+                    breakBlock();
+                    break;
+            }
+        });
+
+        gameLoop = new Timeline(new KeyFrame(Duration.millis(16), e -> {
+            // Update game logic here
+            updateGame();
+            drawWorld();
+        }));
+
+        gameLoop.setCycleCount(Animation.INDEFINITE);
+        gameLoop.play();
+        
+    }
+
+    // initializing the game world with random blocks
+    private void initWorld() {
+        world = new Block[WIDTH / BLOCK_SIZE][HEIGHT / BLOCK_SIZE];
+        Random random = new Random();
+        for (int x = 0; x < world.length; x++) {
+            for (int y = 0; y < world[x].length; y++) {
+                BlockType type = random.nextBoolean()? BlockType.STONE : BlockType.AIR;
+                world[x][y] = new Block(type);
+            }
+        }
+        // set the player's initial position to the center of the world
+        playerX = world.length / 2;
+        playerY = world[0].length / 2; }
+
+    private void drawWorld() {
+        gc.clearRect(0, 0, WIDTH, HEIGHT);
+        for (int x = 0; x < world.length; x++) {
+            for (int y = 0; y < world[x].length; y++) {
+                Block block = world[x][y];
+                if (block!= null) {
+                    switch (block.getType()) {
+                        case STONE:
+                            gc.setFill(Color.DARKGRAY);
+                            break;
+                        case AIR:
+                            gc.setFill(Color.LIGHTGRAY);
+                            break;
+                        default:
+
+                            gc.setFill(Color.WHITE);
+                    }
+                    // draw a block at the current position
+                    gc.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                }}}
+        // drawing the player as a red block, as an example
+        gc.setFill(Color.RED);
+        gc.fillRect(playerX * BLOCK_SIZE, playerY * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    }
+
+    // move the player by the given amount
+    private void movePlayer(int dx, int dy) {
+        int newX = playerX + dx / BLOCK_SIZE;
+        int newY = playerY + dy / BLOCK_SIZE;
+        if (newX >= 0 && newX < world.length && newY >= 0 && newY < world[0].length) {
+            // check if the new position is not a solid block, to avoid present and future bugs
+            Block block = world[newX][newY];
+            if (block!= null && block.getType() == BlockType.AIR) {
+                playerX = newX;
+                playerY = newY;
+            }
+        }
+    }
+
+    private void breakBlock() {
+        Block block = world[playerX][playerY];
+        if (block!= null &&!block.isBroken()) {
+            block.breakBlock();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+                block.setType(BlockType.AIR);
+            }).start();
+        }
+    }
+
+    private void updateGame() {
+        // check for player collision with blocks
+        for (int x = 0; x < world.length; x++) {
+            for (int y = 0; y < world[x].length; y++) {
+                Block block = world[x][y];
+                if (block!= null && block.getType() == BlockType.STONE) {
+                    // check if player is colliding with the block
+                    if (playerX == x && playerY == y) {
+                      //Colission
+                        System.out.println("Player collided with stone block!");
+                    }
+                }
+            }}
+        for (int x = 0; x < world.length; x++) {
+            for (int y = 0; y < world[x].length; y++) {
+                Block block = world[x][y];
+                if (block!= null) {
+                    block.update();
+                }}}}
+
+
+    public enum BlockType {
+        AIR, STONE, DIRT, GRASS, WATER;}
+
+
+    public static class Block {
+        private BlockType type;
+        private boolean broken;
+
+        public Block(BlockType type) {
+            this.type = type;
+            this.broken = false;
+        }
+
+        public BlockType getType() {
+            return type;}
+
+
+
+        public boolean isBroken() {
+            return broken;}
+
+        public void breakBlock() {
+            broken = true;}
+
+
+
+        public void setType(BlockType type) {
+            this.type = type; }
+
+        public void update() {
+            if (isBroken()) {
+                // If the block is broken, change its type to AIR after 1 second
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    setType(BlockType.AIR);
+                }).start(); }}}
+
+
+
+    public static void main(String[] args) {
+        launch(args);
+    }}
